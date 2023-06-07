@@ -23,6 +23,29 @@ logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', \
                     datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 logger = logging.getLogger('__file__')
 
+predicted_num_dict = {'no_relation':0,
+"org:date:formed_on":1,
+"org:gpe:operations_in":2,
+"pers:org:member_of":3,
+"pers:org:employee_of":4,
+"pers:gov_agy:member_of":5,
+"org:org:acquired_by":6,
+"org:money:loss_of":7,
+"org:gpe:headquartered_in":8,
+"pers:univ:employee_of":9,
+"org:date:acquired_on":10,
+"pers:univ:attended":11,
+"org:gpe:formed_in":12,
+"org:money:profit_of":13,
+"org:money:cost_of":14,
+"org:org:subsidiary_of":15,
+"org:org:shares_of":16,
+"pers:org:founder_of":17,
+"pers:title:title":18,
+"org:money:revenue_of":19,
+"org:org:agreement_with":20,
+"pers:univ:member_of":21}
+
 def process_text(text, mode='train'):
     sents, relations, comments, blanks = [], [], [], []
     for i in range(int(len(text)/4)):
@@ -53,24 +76,24 @@ def preprocess_semeval2010_8(args):
     '''
     data_path = args.train_data #'./data/SemEval2010_task8_all_data/SemEval2010_task8_training/TRAIN_FILE.TXT'
     logger.info("Reading training file %s..." % data_path)
-    with open(data_path, 'r', encoding='utf8') as f:
-        text = f.readlines()
+    ##with open(data_path, 'r', encoding='utf8') as f:
+    ##    text = f.readlines()
     
-    sents, relations, comments, blanks = process_text(text, 'train')
-    df_train = pd.DataFrame(data={'sents': sents, 'relations': relations})
+    ##sents, relations, comments, blanks = process_text(text, 'train')
+    df_train = pd.DataFrame("TRAIN_FILE_FULL.CSV")#pd.DataFrame(data={'sents': sents, 'relations': relations})
     
     data_path = args.test_data #'./data/SemEval2010_task8_all_data/SemEval2010_task8_testing_keys/TEST_FILE_FULL.TXT'
     logger.info("Reading test file %s..." % data_path)
-    with open(data_path, 'r', encoding='utf8') as f:
-        text = f.readlines()
+    ##with open(data_path, 'r', encoding='utf8') as f:
+    ##    text = f.readlines()
     
-    sents, relations, comments, blanks = process_text(text, 'test')
-    df_test = pd.DataFrame(data={'sents': sents, 'relations': relations})
+    ##sents, relations, comments, blanks = process_text(text, 'test')
+    df_test = pd.DataFrame("TEST_FILE_FULL.CSV") ##pd.DataFrame(data={'sents': sents, 'relations': relations})
     
     rm = Relations_Mapper(df_train['relations'])
     save_as_pickle('relations.pkl', rm)
-    df_test['relations_id'] = df_test.progress_apply(lambda x: rm.rel2idx[x['relations']], axis=1)
-    df_train['relations_id'] = df_train.progress_apply(lambda x: rm.rel2idx[x['relations']], axis=1)
+    df_test['relations_id'] = df_test['relation'].apply(lambda x: predicted_num_dict[x]) ##(lambda x: rm.rel2idx[x['relations']], axis=1)
+    df_train['relations_id'] = df_train['relation'].apply(lambda x: predicted_num_dict[x['relations']]) ##(lambda x: rm.rel2idx[x['relations']], axis=1)
     save_as_pickle('df_train.pkl', df_train)
     save_as_pickle('df_test.pkl', df_test)
     logger.info("Finished and saved!")
